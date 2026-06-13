@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>爸爸的復健教練・跟練版</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFFBF2; --ink:#2A2620;
+    --pine:#1E5B43; --pine-deep:#143F2E;
+    --persimmon:#D9572B; --sand:#F1E6D2; --line:#D8CCB6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{font-size:18px;}
+  body{
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    background:var(--paper); color:var(--ink);
+    min-height:100vh; padding-bottom:150px;
+  }
+  header{
+    background:var(--pine); color:#FFF9EC;
+    padding:1.4rem 1.2rem 1.2rem;
+    border-bottom:6px solid var(--persimmon);
+  }
+  header h1{font-size:1.65rem;font-weight:900;letter-spacing:.08em;}
+  header p{margin-top:.35rem;font-size:1rem;opacity:.92;letter-spacing:.04em;}
+  .play-all-wrap{padding:1.1rem 1rem .4rem;}
+  .play-all{
+    width:100%; background:var(--persimmon); color:#FFF9EC;
+    border:none; border-radius:18px; font-family:inherit;
+    font-size:1.45rem; font-weight:900; letter-spacing:.1em;
+    padding:1.1rem; cursor:pointer; box-shadow:0 4px 0 #A93D1B;
+  }
+  .play-all:active{transform:translateY(3px);box-shadow:0 1px 0 #A93D1B;}
+  .play-all small{display:block;font-size:.85rem;font-weight:500;margin-top:.2rem;letter-spacing:.05em;}
+  .speed-row{display:flex;gap:.6rem;padding:.7rem 1rem .3rem;align-items:center;}
+  .speed-row span{font-size:1.05rem;font-weight:700;letter-spacing:.06em;}
+  .speed-btn{
+    flex:1;font-family:inherit;font-size:1.1rem;font-weight:700;
+    padding:.65rem;border-radius:12px;border:2px solid var(--pine);
+    background:#fff;color:var(--pine);cursor:pointer;
+  }
+  .speed-btn.on{background:var(--pine);color:#FFF9EC;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;padding:1rem;}
+  .tile{
+    background:#fff;border:2.5px solid var(--line);border-radius:20px;
+    padding:1rem .4rem .85rem;text-align:center;cursor:pointer;
+    font-family:inherit;-webkit-tap-highlight-color:rgba(217,87,43,.15);
+  }
+  .tile .word{display:block;font-size:2.3rem;font-weight:900;line-height:1.15;color:var(--pine-deep);}
+  .tile .sub{display:block;margin-top:.25rem;font-size:.88rem;font-weight:500;color:#6F6757;}
+  .tile .mins{display:block;margin-top:.15rem;font-size:.8rem;color:#A39780;}
+  .tile.playing{background:var(--pine);border-color:var(--pine);}
+  .tile.playing .word{color:#FFF9EC;}
+  .tile.playing .sub,.tile.playing .mins{color:#D9EBDF;}
+  .now{
+    margin:0 1rem;background:var(--sand);border-radius:18px;
+    padding:1.1rem 1.2rem;min-height:6rem;
+  }
+  .now .label{font-size:.95rem;font-weight:700;color:var(--persimmon);letter-spacing:.18em;}
+  .now .text{margin-top:.4rem;font-size:1.3rem;font-weight:700;line-height:1.6;}
+  .now .round{margin-top:.35rem;font-size:1.05rem;font-weight:700;color:var(--pine);}
+  .stopbar{
+    position:fixed;left:0;right:0;bottom:0;background:#FFFBF2;
+    border-top:2px solid var(--line);
+    padding:.8rem 1rem calc(.8rem + env(safe-area-inset-bottom));
+    display:flex;gap:.7rem;
+  }
+  .stopbar button{
+    flex:1;font-family:inherit;font-size:1.22rem;font-weight:900;
+    letter-spacing:.08em;padding:.95rem;border-radius:16px;border:none;cursor:pointer;
+  }
+  #stopBtn{background:var(--ink);color:#FFF9EC;}
+  #againBtn{background:#fff;color:var(--pine);border:2.5px solid var(--pine);}
+  .footnote{padding:1.1rem 1.3rem 0;font-size:.95rem;color:#7B7261;line-height:1.7;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>爸爸的復健教練・跟練版</h1>
+  <p>按一個字，我陪你做完這個動作</p>
+</header>
+
+<div class="play-all-wrap">
+  <button class="play-all" id="playAll">▶ 做完整套復健<small>約 25～30 分鐘，跟著聲音做就好</small></button>
+</div>
+
+<div class="speed-row">
+  <span>語速</span>
+  <button class="speed-btn" data-rate="0.8">慢慢講</button>
+  <button class="speed-btn on" data-rate="0.92">正常</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="now" id="now">
+  <div class="label">現在進行</div>
+  <div class="text" id="nowText">按上面的字，教練就開始陪你做囉。</div>
+  <div class="round" id="nowRound"></div>
+</div>
+
+<div class="footnote">
+  做的時候有點痠、有點緊是正常的，那是身體在進步，不用怕。<br>
+  全部做完如果覺得緊緊的，可以冰敷一下幫助舒緩。
+</div>
+
+<div class="stopbar">
+  <button id="againBtn">🔁 再做一次</button>
+  <button id="stopBtn">⏹ 停止</button>
+</div>
+
+<script>
+/* ===== 數字 ===== */
+const NUM = ["一","二","三","四","五","六","七","八","九","十",
+             "十一","十二","十三","十四","十五","十六","十七","十八","十九","二十"];
+
+/* ===== 語音引擎 ===== */
+const synth = window.speechSynthesis;
+let rate = 0.92;
+let session = 0;            // 切換 session 即中斷舊播放
+let lastPlayed = null;
+
+function getVoice(){
+  const vs = synth.getVoices();
+  return vs.find(v=>v.lang==="zh-TW") || vs.find(v=>v.lang&&v.lang.startsWith("zh")) || null;
+}
+function speak(text){
+  return new Promise(res=>{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang="zh-TW"; u.rate=rate; u.pitch=1;
+    const v=getVoice(); if(v)u.voice=v;
+    u.onend=res; u.onerror=res;
+    synth.speak(u);
+  });
+}
+const wait = s => new Promise(r=>setTimeout(r, s*1000));
+
+async function run(steps, my){
+  for(const st of steps){
+    if(session!==my) return false;
+    if(st.say)        await speak(st.say);
+    else if(st.pause) await wait(st.pause);
+    else if(st.count){
+      for(let i=0;i<st.count;i++){
+        if(session!==my) return false;
+        await speak(NUM[i]); await wait(0.35);
+      }
+    }
+    else if(st.round!==undefined) setRound(st.round, st.of);
+    else if(st.status) setStatus(st.status);
+  }
+  return true;
+}
+
+/* ===== 段落內容（跟練式） ===== */
+function buildLa(){ // 拉：8 組（勾10秒＋壓10秒）
+  const s=[{say:"這一段我們來拉腳踝。腳板要整個前後拉伸，不是只有腳趾頭用力喔。拉的時候，小腿要有被拉到的感覺，腳趾頭盡量撐開。我們做八組，跟著我。"},{pause:2}];
+  for(let r=1;r<=8;r++){
+    s.push({round:r,of:8});
+    s.push({say:"第"+NUM[r-1]+"組。腳板往後勾，勾到底，小腿緊緊的，停住。"});
+    s.push({count:10});
+    s.push({say:"好，放鬆。"});
+    s.push({pause:3});
+    s.push({say:"換腳板往前壓，壓到底，停住。"});
+    s.push({count:10});
+    s.push({say:"好，放鬆。"});
+    s.push({pause:3});
+    if(r===3) s.push({say:"很好，小腿有緊緊的感覺，就表示有拉到位。"});
+    if(r===6) s.push({say:"腳趾頭記得撐開喔，做得很棒。"});
+  }
+  s.push({say:"腳踝拉筋完成了！休息一下。"});
+  return s;
+}
+function buildWan(){ // 彎：10 組（伸直5＋彎曲5）
+  const s=[{say:"這一段躺在床上做。我們要把腳一直、一彎，來回慢慢做，總共十組。"},{pause:2}];
+  for(let r=1;r<=10;r++){
+    s.push({round:r,of:10});
+    s.push({say:"第"+NUM[r-1]+"組。把腳伸到最直，膝蓋往下壓，停住。"});
+    s.push({count:5});
+    s.push({say:"現在慢慢把腳彎起來，彎到可以彎的最大角度，到了就停住。"});
+    s.push({count:5});
+    s.push({say:"好，慢慢伸直回來。"});
+    s.push({pause:3});
+    if(r===4) s.push({say:"彎的時候緊緊的、痠痠的，是正常的，不用怕，你做得很好。"});
+    if(r===7) s.push({say:"慢慢來，比上一次多彎一點點，就是進步。"});
+  }
+  s.push({say:"伸直彎曲完成了！這個動作對膝蓋最重要，爸爸很棒。"});
+  return s;
+}
+function buildZheng(){ // 正：靜態保持約2分鐘
+  return [
+    {say:"這一段很簡單，但很重要：檢查腳的位置。現在看一下你的腳，有沒有往外開開的？"},
+    {pause:3},
+    {say:"把腳尖轉回來，朝正前方，像時鐘的十二點方向。"},
+    {pause:2},
+    {say:"好，保持這個正正的位置。這段時間放鬆呼吸，腳保持朝前就好。"},
+    {pause:8},
+    {say:"吸氣。"},{pause:3},{say:"吐氣。腳尖朝前。"},
+    {pause:10},
+    {say:"很好，繼續保持。平常坐著、躺著的時候，也要記得這個姿勢喔。"},
+    {pause:10},
+    {say:"吸氣。"},{pause:3},{say:"吐氣。"},
+    {pause:10},
+    {say:"再保持一下下，你做得很好。"},
+    {pause:10},
+    {say:"好，這一段完成了！記住這個感覺，平常也要這樣擺。"}
+  ];
+}
+function buildAn(){ // 按：上20、下20、疤痕15
+  const s=[{say:"這一段來按摩膝蓋。先說好：按的時候會痠痠痛痛的，這是正常的，表示有按到位，不用害怕喔。"},{pause:2},
+           {say:"先按膝蓋上面。用手垂直的方向，上下推按。跟著我的數字，一個數字推一下。"},{pause:1}];
+  s.push({round:1,of:3},{status:"按摩：膝蓋上面"});
+  s.push({count:10},{pause:2},{say:"很好，繼續。"},{count:10});
+  s.push({say:"痠痠的就對了，這是好現象，不是變嚴重。"},{pause:2});
+  s.push({round:2,of:3},{say:"換膝蓋下面，一樣上下推按，跟著數字。"});
+  s.push({count:10},{pause:2},{say:"做得很好，再來。"},{count:10});
+  s.push({pause:2});
+  s.push({round:3,of:3},{say:"最後是疤痕周圍。輕輕地、慢慢地按，幫疤痕放鬆。這裡比較有感覺，輕一點、慢一點。"});
+  s.push({count:10},{pause:2},{say:"疤痕按開了，膝蓋會越來越靈活。再五下。"},{count:5});
+  s.push({say:"按摩完成！等一下全部做完，如果覺得痠，可以冰敷一下幫助舒緩。"});
+  return s;
+}
+function buildTai(){ // 抬：12 次（抬5秒）
+  const s=[{say:"這一段做抬腿。躺好，如果覺得吃力，可以在腿下面墊一顆枕頭，或捲起來的毛巾當小幫手。我們做十二次。"},{pause:3}];
+  for(let r=1;r<=12;r++){
+    s.push({round:r,of:12});
+    s.push({say:"第"+NUM[r-1]+"次。把腿慢慢抬起來，能抬多高就抬多高，停住。"});
+    s.push({count:5});
+    s.push({say:"好，慢慢放下來。"});
+    s.push({pause:3});
+    if(r===4) s.push({say:"不用跟別人比，比昨天的自己高一點點就好。"});
+    if(r===8) s.push({say:"大腿痠痠的，表示肌肉在長力氣，很棒！"});
+  }
+  s.push({say:"抬腿完成了！腿越來越有力囉。"});
+  return s;
+}
+function buildZhuan(){ // 轉：12 組（外3＋內3）
+  const s=[{say:"這一段活動髖關節，讓它保持靈活。我們做十二組。"},{pause:2}];
+  for(let r=1;r<=12;r++){
+    s.push({round:r,of:12});
+    s.push({say:"第"+NUM[r-1]+"組。整隻腳往外轉，慢慢轉到底。"});
+    s.push({count:3});
+    s.push({say:"換往內轉，慢慢轉到底。"});
+    s.push({count:3});
+    s.push({pause:2});
+    if(r===6) s.push({say:"轉的時候慢慢的，讓關節活動開來，做得很好。"});
+  }
+  s.push({say:"髖關節活動完成！剩最後一個動作了，加油！"});
+  return s;
+}
+function buildJia(){ // 夾：三小節
+  const s=[{say:"最後一段，拿一顆抱枕，用兩個膝蓋把它夾住。這個動作練大腿內側的力氣。"},{pause:3}];
+  s.push({round:1,of:3},{say:"第一個動作：夾住抱枕，跟著我，往上移，再往下移。一個數字一個來回，做十下。"});
+  s.push({count:10},{pause:2});
+  for(let r=1;r<=8;r++){
+    if(r===1){ s.push({round:2,of:3},{say:"第二個動作：大腿用力向內夾抱枕，夾住，停。"}); }
+    else { s.push({say:"再來，用力夾住，停。"}); }
+    s.push({count:5});
+    s.push({say:"放鬆。"});
+    s.push({pause:2});
+    if(r===4) s.push({say:"大腿內側痠痠的就對了，力氣就是這樣練出來的。"});
+  }
+  s.push({round:3,of:3},{say:"第三個動作：膝蓋向內彎，腿往上彎曲，慢慢做，做八下，跟著數字。"});
+  s.push({count:8});
+  s.push({say:"夾抱枕完成！全部的動作都做完囉！"});
+  return s;
+}
+function buildEnd(){ // 收操
+  return [
+    {say:"爸爸，今天七個動作全部做完了，你真的很棒！"},
+    {pause:1},
+    {say:"現在感覺一下：如果拉完覺得緊緊的，或是按摩完痠痠的，可以去冰敷一下，會比較舒服。"},
+    {pause:1},
+    {say:"記住喔，今天的痠和緊，都是身體在變好的證明，不是變嚴重，不用擔心。"},
+    {pause:1},
+    {say:"休息一下，喝口水。明天同一時間，我們再一起做。爸爸，辛苦了，你最棒！"}
+  ];
+}
+
+const SECTIONS = [
+  { word:"拉", sub:"腳踝拉筋",   mins:"約4分鐘", build:buildLa },
+  { word:"彎", sub:"伸直彎曲",   mins:"約4分鐘", build:buildWan },
+  { word:"正", sub:"腳擺正",     mins:"約2分鐘", build:buildZheng },
+  { word:"按", sub:"按摩膝蓋",   mins:"約4分鐘", build:buildAn },
+  { word:"抬", sub:"抬腿運動",   mins:"約4分鐘", build:buildTai },
+  { word:"轉", sub:"髖關節",     mins:"約3分鐘", build:buildZhuan },
+  { word:"夾", sub:"夾抱枕",     mins:"約4分鐘", build:buildJia },
+  { word:"收操", sub:"完成稱讚", mins:"約1分鐘", build:buildEnd }
+];
+const OPENING = "爸爸好！我們來做今天的復健囉。今天總共有七個動作：拉筋、伸直彎曲、腳擺正、按摩膝蓋、抬腿、轉髖、夾抱枕。做的時候，有點痠、有點緊，都是正常的，那是身體在進步的訊號，不用害怕。我們不趕時間，慢慢做。準備好了嗎？開始囉！";
+
+/* ===== UI ===== */
+const grid = document.getElementById("grid");
+const nowText = document.getElementById("nowText");
+const nowRound = document.getElementById("nowRound");
+let currentTile = null;
+
+SECTIONS.forEach((sec,i)=>{
+  const b=document.createElement("button");
+  b.className="tile";
+  b.innerHTML=`<span class="word">${sec.word}</span><span class="sub">${sec.sub}</span><span class="mins">${sec.mins}</span>`;
+  b.addEventListener("click",()=>playSection(i));
+  grid.appendChild(b);
+});
+
+function highlight(i){
+  if(currentTile) currentTile.classList.remove("playing");
+  currentTile=null;
+  nowRound.textContent="";
+  if(i!==null){
+    currentTile=grid.children[i];
+    currentTile.classList.add("playing");
+    nowText.textContent=SECTIONS[i].word+"──"+SECTIONS[i].sub;
+  }
+}
+function setRound(r,of){ nowRound.textContent="第 "+r+" / "+of+" 組"; }
+function setStatus(t){ nowRound.textContent=t; }
+
+function stopAll(){
+  session++;
+  synth.cancel();
+  highlight(null);
+}
+
+async function playSection(i){
+  stopAll();
+  const my=session;
+  lastPlayed={type:"one",index:i};
+  highlight(i);
+  const done=await run(SECTIONS[i].build(),my);
+  if(done && session===my){
+    highlight(null);
+    nowText.textContent="這一段做完了！想再做一次就按「再做一次」。";
+  }
+}
+
+async function playFull(){
+  stopAll();
+  const my=session;
+  lastPlayed={type:"all"};
+  nowText.textContent="完整復健開始！";
+  await speak(OPENING);
+  for(let i=0;i<SECTIONS.length;i++){
+    if(session!==my) return;
+    highlight(i);
+    const ok=await run(SECTIONS[i].build(),my);
+    if(!ok) return;
+    if(i<SECTIONS.length-1){ await speak("休息三十秒，等一下做下一個動作。"); await wait(30); }
+  }
+  if(session===my){
+    highlight(null);
+    nowText.textContent="今天整套復健完成！爸爸最棒！";
+  }
+}
+
+document.getElementById("playAll").addEventListener("click",playFull);
+document.getElementById("stopBtn").addEventListener("click",()=>{
+  stopAll();
+  nowText.textContent="已經停止。想做哪一段，再按那個字。";
+});
+document.getElementById("againBtn").addEventListener("click",()=>{
+  if(!lastPlayed){ nowText.textContent="先按一個字，我陪你做。"; return; }
+  if(lastPlayed.type==="all") playFull();
+  else playSection(lastPlayed.index);
+});
+document.querySelectorAll(".speed-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".speed-btn").forEach(b=>b.classList.remove("on"));
+    btn.classList.add("on");
+    rate=parseFloat(btn.dataset.rate);
+  });
+});
+if(typeof speechSynthesis!=="undefined"){ speechSynthesis.onvoiceschanged=()=>{}; }
+</script>
+</body>
+</html>
