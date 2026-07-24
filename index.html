@@ -248,7 +248,7 @@ function buildZhuan(){ // 轉：12 組（外3＋內3）
     s.push({pause:2});
     if(r===6) s.push({say:"轉的時候慢慢的，讓關節活動開來，做得很好。"});
   }
-  s.push({say:"髖關節活動完成！剩最後一個動作了，加油！"});
+  s.push({say:"髖關節活動完成！剩兩個動作了，加油！"});
   return s;
 }
 function buildJia(){ // 夾：三小節
@@ -265,12 +265,27 @@ function buildJia(){ // 夾：三小節
   }
   s.push({round:3,of:3},{say:"第三個動作：膝蓋向內彎，腿往上彎曲，慢慢做，做八下，跟著數字。"});
   s.push({count:8});
-  s.push({say:"夾抱枕完成！全部的動作都做完囉！"});
+  s.push({say:"夾抱枕完成！剩最後一個動作了，加油！"});
+  return s;
+}
+function buildCheng(){ // 撐：橋式撐屁股 10 次（頂住10秒）
+  const s=[{say:"這一段做撐屁股。先躺好，兩個膝蓋彎起來，兩隻腳踩穩在床上，雙手放在身體兩邊。等一下臀部要用力，把骨盆往上頂，每次停留十秒。如果中途撐不住，先放下來休息，沒關係。我們做十次。"},{pause:3}];
+  for(let r=1;r<=10;r++){
+    s.push({round:r,of:10});
+    s.push({say:"第"+NUM[r-1]+"次。屁股用力，把骨盆慢慢往上頂，頂到最高，停住。"});
+    s.push({count:10});
+    s.push({say:"好，慢慢放下來，輕輕放回床上。"});
+    s.push({pause:3});
+    if(r===3) s.push({say:"頂的時候不要憋氣喔，記得慢慢呼吸。"});
+    if(r===6) s.push({say:"屁股痠痠的，表示臀部的肌肉在用力，很棒！"});
+    if(r===9) s.push({say:"最後兩次了，加油，你做得很好。"});
+  }
+  s.push({say:"撐屁股完成了！臀部有力，走路才會穩。"});
   return s;
 }
 function buildEnd(){ // 收操
   return [
-    {say:"爸爸，今天七個動作全部做完了，你真的很棒！"},
+    {say:"爸爸，今天八個動作全部做完了，你真的很棒！"},
     {pause:1},
     {say:"現在感覺一下：如果拉完覺得緊緊的，或是按摩完痠痠的，可以去冰敷一下，會比較舒服。"},
     {pause:1},
@@ -288,9 +303,10 @@ const SECTIONS = [
   { word:"抬", sub:"抬腿運動",   mins:"約4分鐘", build:buildTai },
   { word:"轉", sub:"髖關節",     mins:"約3分鐘", build:buildZhuan },
   { word:"夾", sub:"夾抱枕",     mins:"約4分鐘", build:buildJia },
+  { word:"撐", sub:"撐屁股",     mins:"約4分鐘", build:buildCheng },
   { word:"收操", sub:"完成稱讚", mins:"約1分鐘", build:buildEnd }
 ];
-const OPENING = "爸爸好！我們來做今天的復健囉。今天總共有七個動作：拉筋、伸直彎曲、腳擺正、按摩膝蓋、抬腿、轉髖、夾抱枕。做的時候，有點痠、有點緊，都是正常的，那是身體在進步的訊號，不用害怕。我們不趕時間，慢慢做。準備好了嗎？開始囉！";
+const OPENING = "爸爸好！我們來做今天的復健囉。今天總共有八個動作：拉筋、伸直彎曲、腳擺正、按摩膝蓋、抬腿、轉髖、夾抱枕、撐屁股。做的時候，有點痠、有點緊，都是正常的，那是身體在進步的訊號，不用害怕。我們不趕時間，慢慢做。準備好了嗎？開始囉！";
 
 /* ===== UI ===== */
 const grid = document.getElementById("grid");
